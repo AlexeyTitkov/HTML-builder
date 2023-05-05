@@ -1,10 +1,7 @@
 const fs = require('fs').promises;
 const path = require('path');
 
-async function copyDir() {
-  const sourceDir = path.join(__dirname, 'files');
-  const targetDir = path.join(__dirname, 'files-copy');
-
+async function copyDir(sourceDir, targetDir) {
   try {
     await fs.access(targetDir);
   } catch (error) {
@@ -14,12 +11,19 @@ async function copyDir() {
   const files = await fs.readdir(sourceDir, { withFileTypes: true });
 
   for (const file of files) {
+    const sourceFile = path.join(sourceDir, file.name);
+    const targetFile = path.join(targetDir, file.name);
+
     if (file.isFile()) {
-      const sourceFile = path.join(sourceDir, file.name);
-      const targetFile = path.join(targetDir, file.name);
       await fs.copyFile(sourceFile, targetFile);
+    } else if (file.isDirectory()) {
+      await copyDir(sourceFile, targetFile);
     }
   }
+  console.log(`Папка files скопирована в ${targetDir}`);
 }
 
-copyDir();
+const sourceDir = path.join(__dirname, 'files');
+const targetDir = path.join(__dirname, 'files-copy');
+
+copyDir(sourceDir, targetDir);
