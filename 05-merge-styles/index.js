@@ -5,33 +5,25 @@ const stylesFolderPath = path.join(__dirname, 'styles');
 const outputFolderPath = path.join(__dirname, 'project-dist');
 const outputFile = path.join(outputFolderPath, 'bundle.css');
 
-fs.readdir(stylesFolderPath, (err, files) => {
+fs.readdir(stylesFolderPath, async (err, files) => {
   if (err) {
     console.error(err);
     return;
   }
 
   const cssFiles = files.filter((file) => path.extname(file) === '.css');
-  const cssContent = [];
 
-  cssFiles.forEach((file, index) => {
+  const cssContent = await Promise.all(cssFiles.map(async (file) => {
     const filePath = path.join(stylesFolderPath, file);
-    fs.readFile(filePath, 'utf-8', (err, content) => {
-      if (err) {
-        console.error(err);
-        return;
-      }
+    const fileContent = await fs.promises.readFile(filePath, 'utf-8');
+    return fileContent;
+  }));
 
-      cssContent[index] = content;
-      if (index === cssFiles.length - 1) {
-        fs.writeFile(outputFile, cssContent.join(''), (err) => {
-          if (err) {
-            console.error(err);
-            return;
-          }
-          console.log('Стили соединены в bundle.css');
-        });
-      }
-    });
+  fs.writeFile(outputFile, cssContent.join(''), (err) => {
+    if (err) {
+      console.error(err);
+    } else {
+      console.log(`Стили из папки styles соеденены в файл и помещены в ${outputFile}`);
+    }
   });
 });
