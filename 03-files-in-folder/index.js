@@ -20,7 +20,8 @@ fs.readdir(folderPath, (err, files) => {
       if (stats.isFile()) {
         const ext = path.extname(file).slice(1);
         const fileSize = stats.size / 1024;
-        console.log(`${file}-${ext}-${fileSize.toFixed(3)}kb`);
+        const fileName = path.basename(file, path.extname(file));
+        console.log(`${fileName} - ${ext} - ${fileSize.toFixed(3)}kb`);
       }
     });
   });
